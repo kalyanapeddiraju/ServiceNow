@@ -1,0 +1,36 @@
+stages:
+  - test
+  - reports
+
+variables:
+  CONFIG_NAME: test
+  RESULTS_DIRECTORY: "/out/TestReports/"
+
+Test:
+  stage: test
+  image: <<need to place the docker image>>
+  script:
+    - echo "Test will run in -->" $Denv "environment"
+    - echo "Test will run for -->" $apiname
+    - pwd
+    - ls -a
+    - find . -name InputDataSheet.xlsx
+
+    - ./gradlew clean $apiname -Denv=$Denv
+  artifacts:
+    name: "Test Logs"
+    when: always
+    paths:
+      - ${CI_PROJECT_DIR}/${RESULTS_DIRECTORY}
+      - ${CI_PROJECT_DIR}/build/reports/testng/
+
+pages:
+  stage: reports
+  when: always
+  script:
+    - mkdir public
+    - cp -a ${CI_PROJECT_DIR}/${RESULTS_DIRECTORY} public/test
+    - cp -a ${CI_PROJECT_DIR}/build/reports/testng/ public/test
+  artifacts:
+    paths:
+      - public
